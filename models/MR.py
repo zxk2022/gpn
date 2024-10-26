@@ -55,11 +55,11 @@ class MRConv(MessagePassing):
         # Compute the difference between each node and its neighbors.
         diff = x_j - x_i
         # Apply the neural network to the difference vector.
-        return self.nn(diff)
+        return diff
 
     def update(self, aggr_out: Tensor, x: PairTensor) -> Tensor:
         # Concatenate the aggregated max value with the original feature.
-        return torch.cat([x[0], aggr_out], dim=-1)
+        return self.nn(torch.cat([x[0], aggr_out], dim=-1))
 
     def __repr__(self) -> str:
         return f'{self.__class__.__name__}(nn={self.nn})'
@@ -97,13 +97,13 @@ class MRNet(nn.Module):
                 conv_layers = []
                 for i in range(len(layer) - 3):
                     if i == 0:
-                        conv_layers.append(Linear(in_channels, layer[i+2]))
+                        conv_layers.append(Linear(in_channels*2, layer[i+2]))
                     else:
                         conv_layers.append(Linear(in_channels, layer[i+2]))
                     conv_layers.append(ReLU())
                     in_channels = layer[i+2]
                 if len(layer) == 3:
-                    conv_layers.append(Linear(in_channels, layer[-1]))
+                    conv_layers.append(Linear(in_channels*2, layer[-1]))
                 else:
                     conv_layers.append(Linear(in_channels, layer[-1]))
                 self.convs.append(MRConv(Sequential(*conv_layers), aggr=layer[1]))
