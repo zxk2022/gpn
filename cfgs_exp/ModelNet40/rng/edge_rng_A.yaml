@@ -1,0 +1,15 @@
+# config.yaml
+model: EdgeNet
+type: 0
+data_dir: data/ModelNet40
+output: output/RNG_Modelnet40
+epochs: 300
+batch: 256
+lr: 0.001
+min_lr: 0.0000001
+dropout: 0.5
+keys: pos
+graph_type: rng
+undirected: true
+configs:
+  - [['edge', 'max', 32], ['relu'], ['edge', 'max', 32], ['relu'], ['edge', 'max', 128]]

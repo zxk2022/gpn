@@ -1,0 +1,23 @@
+# 忽略目录
+results/
+output/
+data/
+
+output_objs/
+output_pcds/
+pcd_test/
+
+__pycache__/
+.vscode/
+remote/
+
+pcl_utils/build/
+
+# 忽略文件类型
+*.pcd
+*.obj
+*.off
+*.dat
+*.h5
+*.sh
+*.tar.gz

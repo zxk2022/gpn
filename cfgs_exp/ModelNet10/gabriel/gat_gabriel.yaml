@@ -1,0 +1,15 @@
+# config.yaml
+model: GATNet
+type: 0
+data_dir: data/ModelNet10
+output: output/Gabriel_Modelnet10
+epochs: 300
+batch: 256
+lr: 0.001
+min_lr: 0.0000001
+dropout: 0.5
+keys: pos
+graph_type: gabriel
+undirected: true
+configs:
+  - [['gat', 4, 32, 64, 128]]

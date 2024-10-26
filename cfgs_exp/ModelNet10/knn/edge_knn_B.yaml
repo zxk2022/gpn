@@ -1,0 +1,15 @@
+# config.yaml
+model: EdgeNet
+type: 0
+data_dir: data/ModelNet10
+output: output/KNN_Modelnet10
+epochs: 300
+batch: 256
+lr: 0.001
+min_lr: 0.0000001
+dropout: 0.5
+keys: pos
+graph_type: knn
+undirected: false
+configs:
+  - [['edge', 'max', 16], ['relu'], ['edge', 'max', 32], ['relu'], ['edge', 'max', 256]]

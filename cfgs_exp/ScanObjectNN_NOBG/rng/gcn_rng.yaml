@@ -1,0 +1,16 @@
+# config.yaml
+model: GCNNet
+type: 0
+data_dir: data/ScanObjectNN
+output: output/Gabriel_ScanObjectNN_BG
+use_bg: true
+epochs: 300
+batch: 256
+lr: 0.001
+min_lr: 0.0000001
+dropout: 0.5
+keys: pos
+graph_type: rng
+undirected: true
+configs:
+  - [['gcn', 32], ['relu'], ['gcn', 64], ['relu'], ['gcn', 128]]
