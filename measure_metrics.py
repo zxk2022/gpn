@@ -7,6 +7,7 @@ import importlib
 import yaml
 import sys
 from models import model_mapping
+from datasets import ModelNet40Dataset
 
 def parse_yaml_config(file_path):
     with open(file_path, 'r') as file:
@@ -63,7 +64,6 @@ def measure_throughput(model, input_tensor, num_runs=100):
 def main():
     parser = argparse.ArgumentParser(description="Measure Params, FLOPs, and Throughput of a trained model")
     parser.add_argument("--model_path", type=str, required=True, help="Path to the trained model")
-    parser.add_argument("--model_name", type=str, required=True, help="Name of the model class")
     parser.add_argument("--input_size", type=int, nargs='+', required=True, help="Input size of the model")
     parser.add_argument("--num_runs", type=int, default=100, help="Number of runs for measuring throughput")
     parser.add_argument('--cfgs', type=str, help='Path to the YAML file')
@@ -78,7 +78,9 @@ def main():
     model.load_state_dict(torch.load(args.model_path))
     model.eval()
 
-    input_tensor = torch.randn(*args.input_size).to(device)
+    dataset = ModelNet40Dataset(root=args.data_dir, graph_type=args.graph_type, train=False)
+    data_loader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)
+    input_tensor = next(iter(data_loader)).to(device)
 
     macs, params = profile(model, inputs=(input_tensor,))
     print(f"Params: {params}")
