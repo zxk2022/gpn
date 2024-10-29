@@ -9,6 +9,7 @@ from torch_geometric.loader import DataLoader
 from sklearn.model_selection import train_test_split
 
 from py_utils.train_script import train_model, save_results_to_csv
+from py_utils.metrics import measure_model
 
 from models import model_mapping
 import argparse
@@ -26,6 +27,8 @@ def parse_yaml_config(file_path):
     # 创建 ArgumentParser 对象
     parser = argparse.ArgumentParser()
     parser.add_argument('--cfgs', type=str, help='Path to the YAML file')
+    parser.add_argument('--metric', type=bool, default=False, help='Performance Measurement')
+    parser.add_argument('--model_path', type=str, help='Path to the model')
     parser.add_argument('--model', type=str, help='Name of the model')
     parser.add_argument('--type', type=int, help='Type of training')
     parser.add_argument('--data_dir', type=str, help='Path to the dataset')
@@ -100,106 +103,117 @@ test_loader = DataLoader(test_dataset, batch_size=args.batch, shuffle=False)
 
 # Generate a timestamp for the file name
 timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-# 检查输出目录是否存在，如果不存在则创建
-args.output = args.output + '/' + f"{args.model}_" + timestamp
-if not os.path.exists(args.output):
-    os.makedirs(args.output)
 
-# 重复实验
-for i in range(5):
-    # 检查是否有可用的GPU
+if args.metric:
+    args.output = args.output + '/' + 'metrics' + '/' + f"{args.model}_" + timestamp
+    if not os.path.exists(args.output):
+        os.makedirs(args.output)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-    # 创建模型
     model = model_mapping[args.model](train_dataset.num_features, train_dataset.num_classes, args.configs).to(device)
+    model.load_state_dict(torch.load(args.model_path))
+    result = measure_model(model, train_loader, args=args, use_mp_tr=True)
 
-    # 创建优化器和损失函数
-    optimizer = optim.Adam(model.parameters(), lr=args.lr)
+else:
+    # 检查输出目录是否存在，如果不存在则创建
+    args.output = args.output + '/' + f"{args.model}_" + timestamp
+    if not os.path.exists(args.output):
+        os.makedirs(args.output)
 
-    T_max = args.epochs  
-    eta_min = args.min_lr  # 最小学习率为0
+    # 重复实验
+    for i in range(5):
+        # 检查是否有可用的GPU
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    scheduler = CosineAnnealingLR(optimizer, T_max=T_max, eta_min=eta_min)
+        # 创建模型
+        model = model_mapping[args.model](train_dataset.num_features, train_dataset.num_classes, args.configs).to(device)
 
+        # 创建优化器和损失函数
+        optimizer = optim.Adam(model.parameters(), lr=args.lr)
 
-    # criterion = nn.CrossEntropyLoss()
-    criterion = nn.NLLLoss()
+        T_max = args.epochs  
+        eta_min = args.min_lr  # 最小学习率为0
 
-    components = {
-        'model': model,
-        'train_loader': train_loader,
-        'val_loader': val_loader,
-        'test_loader': test_loader,
-        'optimizer': optimizer,
-        'criterion': criterion,
-        'device': device,
-        'scheduler': scheduler,
-    }
-
-    print(args.__dict__)
-    print(f"Model: {args.model}")
-    print(f"Type: {args.type}")
-    print(f"Data: {args.data_dir}")
-    print(f"Number of features: {train_dataset.num_features}")
-    print(f"Number of classes: {train_dataset.num_classes}")
-    print(f"Device: {device}")
-    print(f"Model architecture:\n{model}")
-    print(f"Optimizer: {optimizer}")
-    print(f"Criterion: {criterion}")
-    type = args.type
-
-    # 构建文件路径
-    file_path = f"{args.output}/cfg.txt"
-
-    # 打开文件，如果文件不存在则创建，如果存在则追加
-    with open(file_path, 'a') as file:
-        # 写入打印内容
-        file.write(str(args.__dict__) + '\n')
-        file.write(f"Number of features: {train_dataset.num_features}\n")
-        file.write(f"Number of classes: {train_dataset.num_classes}\n")
-        file.write(f"Device: {device}\n")
-        file.write(f"Model architecture:\n{model}\n")
-        file.write(f"Optimizer: {optimizer}\n")
-        file.write(f"Criterion: {criterion}\n")
-        file.write(f"lr: {args.lr}\n")
-        file.write(f"min_lr: {args.min_lr}\n")
-
-    if type == 0:
-        # 训练模型
-        result = train_model(**components, args=args, num_exp=i, use_mp_tr=True, use_mp_val=True, use_mp_te=True)
-    elif type == 1:
-        # 训练模型
-        result = train_model(**components, args=args, num_exp=i, use_mp_tr=False, use_mp_val=False, use_mp_te=True)
-    elif type == 2:
-        # 训练模型
-        result = train_model(**components, args=args, num_exp=i, use_mp_tr=False, use_mp_val=False, use_mp_te=False)
-    else:
-        assert False, 'Invalid type'
-
-    # 手动格式化打印
-    print("\n")
-    print(f"------------------------------result of exp{i}------------------------------------")
-    print("Best Validation OA: {:.4f}".format(result['Best Validation OA']))
-    print("Best Validation MACC: {:.4f}".format(result['Best Validation MACC']))
-    print("Chosen Epoch: {}".format(result['Chosen Epoch']))
-    print("Chosen Loss: {:.4f}".format(result['Chosen Loss']))
-    print("Chosen Train Accuracy: {:.4f}".format(result['Chosen Train Accuracy']))
-    print("Chosen Val OA: {:.4f}".format(result['Chosen Val OA']))
-    print("Chosen Val MACC: {:.4f}".format(result['Chosen Val MACC']))
-    print("Final Epoch Val OA: {:.4f}".format(result['Final Epoch Val OA']))
-    print("Final Epoch Val MACC: {:.4f}".format(result['Final Epoch Val MACC']))
-
-    print("Test OA: {:.4f}".format(result['Test OA']))
-    print("Test MACC: {:.4f}".format(result['Test MACC']))
-    print("Final Epoch Test OA: {:.4f}".format(result['Final Epoch Test OA']))
-    print("Final Epoch Test MACC: {:.4f}".format(result['Final Epoch Test MACC']))
-    print("Total Time: {:.2f}s".format(result['Total Time']))
-    print(f"------------------------------result of exp{i}------------------------------------")
-    print("\n")
+        scheduler = CosineAnnealingLR(optimizer, T_max=T_max, eta_min=eta_min)
 
 
-    # Create the file name with the timestamp
-    file_name = f"{args.output}/results.csv"
+        # criterion = nn.CrossEntropyLoss()
+        criterion = nn.NLLLoss()
 
-    # Save the results to a CSV file
-    save_results_to_csv(result, file_name)
+        components = {
+            'model': model,
+            'train_loader': train_loader,
+            'val_loader': val_loader,
+            'test_loader': test_loader,
+            'optimizer': optimizer,
+            'criterion': criterion,
+            'device': device,
+            'scheduler': scheduler,
+        }
+
+        print(args.__dict__)
+        print(f"Model: {args.model}")
+        print(f"Type: {args.type}")
+        print(f"Data: {args.data_dir}")
+        print(f"Number of features: {train_dataset.num_features}")
+        print(f"Number of classes: {train_dataset.num_classes}")
+        print(f"Device: {device}")
+        print(f"Model architecture:\n{model}")
+        print(f"Optimizer: {optimizer}")
+        print(f"Criterion: {criterion}")
+        type = args.type
+
+        # 构建文件路径
+        file_path = f"{args.output}/cfg.txt"
+
+        # 打开文件，如果文件不存在则创建，如果存在则追加
+        with open(file_path, 'a') as file:
+            # 写入打印内容
+            file.write(str(args.__dict__) + '\n')
+            file.write(f"Number of features: {train_dataset.num_features}\n")
+            file.write(f"Number of classes: {train_dataset.num_classes}\n")
+            file.write(f"Device: {device}\n")
+            file.write(f"Model architecture:\n{model}\n")
+            file.write(f"Optimizer: {optimizer}\n")
+            file.write(f"Criterion: {criterion}\n")
+            file.write(f"lr: {args.lr}\n")
+            file.write(f"min_lr: {args.min_lr}\n")
+
+        if type == 0:
+            # 训练模型
+            result = train_model(**components, args=args, num_exp=i, use_mp_tr=True, use_mp_val=True, use_mp_te=True)
+        elif type == 1:
+            # 训练模型
+            result = train_model(**components, args=args, num_exp=i, use_mp_tr=False, use_mp_val=False, use_mp_te=True)
+        elif type == 2:
+            # 训练模型
+            result = train_model(**components, args=args, num_exp=i, use_mp_tr=False, use_mp_val=False, use_mp_te=False)
+        else:
+            assert False, 'Invalid type'
+
+        # 手动格式化打印
+        print("\n")
+        print(f"------------------------------result of exp{i}------------------------------------")
+        print("Best Validation OA: {:.4f}".format(result['Best Validation OA']))
+        print("Best Validation MACC: {:.4f}".format(result['Best Validation MACC']))
+        print("Chosen Epoch: {}".format(result['Chosen Epoch']))
+        print("Chosen Loss: {:.4f}".format(result['Chosen Loss']))
+        print("Chosen Train Accuracy: {:.4f}".format(result['Chosen Train Accuracy']))
+        print("Chosen Val OA: {:.4f}".format(result['Chosen Val OA']))
+        print("Chosen Val MACC: {:.4f}".format(result['Chosen Val MACC']))
+        print("Final Epoch Val OA: {:.4f}".format(result['Final Epoch Val OA']))
+        print("Final Epoch Val MACC: {:.4f}".format(result['Final Epoch Val MACC']))
+
+        print("Test OA: {:.4f}".format(result['Test OA']))
+        print("Test MACC: {:.4f}".format(result['Test MACC']))
+        print("Final Epoch Test OA: {:.4f}".format(result['Final Epoch Test OA']))
+        print("Final Epoch Test MACC: {:.4f}".format(result['Final Epoch Test MACC']))
+        print("Total Time: {:.2f}s".format(result['Total Time']))
+        print(f"------------------------------result of exp{i}------------------------------------")
+        print("\n")
+
+
+        # Create the file name with the timestamp
+        file_name = f"{args.output}/results.csv"
+
+        # Save the results to a CSV file
+        save_results_to_csv(result, file_name)
