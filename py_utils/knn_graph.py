@@ -37,7 +37,7 @@ def process_pcd_file(file_path, file_index, total_files, k):
     row, col = knn(points_tensor, points_tensor, k, batch_x, batch_y)
     
     # 构造输出文件路径
-    output_file_path = os.path.splitext(file_path)[0] + '_knn.obj'
+    output_file_path = os.path.splitext(file_path)[0] + f'_knn_{k}.obj'
     
     # 将结果写入OBJ文件
     write_obj(output_file_path, points, row.numpy(), col.numpy())
@@ -65,8 +65,8 @@ def process_directory(root_dir, k):
 
 # 主函数
 def main():
-    root_dir = 'data/ScanObjectNN'  # 指定要处理的根目录
-    k = 40
+    root_dir = 'data/SHAPENET_SKEL'  # 指定要处理的根目录
+    k = 13
     process_directory(root_dir, k)
 
 if __name__ == "__main__":

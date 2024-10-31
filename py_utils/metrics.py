@@ -7,7 +7,7 @@ def measure_model(model, train_loader, args, use_mp_tr=True):
 
     # 计算参数数量
     params = sum(p.numel() for p in model.parameters())
-    print(f'Number of parameters: {params}')
+
 
     # 从train_dataloader中获取一个data数据
     input_data = next(iter(train_loader))[0].to(device)  # 假设返回的是一个包含输入数据的元组
@@ -16,7 +16,6 @@ def measure_model(model, train_loader, args, use_mp_tr=True):
 
     # 使用thop库计算FLOPs，同时传递额外的参数
     flops, _ = profile(model, inputs=input_data)
-    print(f'FLOPs: {flops}')
 
     # 初始化batch_size和total_iters
     batch_size = train_loader.batch_size
@@ -42,4 +41,4 @@ def measure_model(model, train_loader, args, use_mp_tr=True):
     total_samples = len(train_loader.dataset)
     # 计算吞吐量
     throughput = total_samples / total_time_s
-    print(f'Throughput: {throughput:.2f} samples/sec')
+    return params, flops, throughput

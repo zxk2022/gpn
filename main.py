@@ -111,7 +111,17 @@ if args.metric:
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = model_mapping[args.model](train_dataset.num_features, train_dataset.num_classes, args.configs).to(device)
     model.load_state_dict(torch.load(args.model_path))
-    result = measure_model(model, train_loader, args=args, use_mp_tr=True)
+    params, flops, throughput  = measure_model(model, train_loader, args=args, use_mp_tr=True)
+    print("------------------------------metric of model------------------------------------")
+    print(f'Model_path: {args.model_path}')
+    print(f'Throughput: {throughput:.2f} samples/sec')
+    print(f'Number of parameters: {params}')
+    print(f'FLOPs: {flops}')
+    print("------------------------------metric of model------------------------------------")
+    # 将结果写入到csv文件中
+    with open(f"{args.output}/metrics.csv", 'w') as file:
+        file.write("Model_path,Throughput,Number of parameters,FLOPs\n")
+        file.write(f"{args.model_path},{throughput},{params},{flops}\n")
 
 else:
     # 检查输出目录是否存在，如果不存在则创建

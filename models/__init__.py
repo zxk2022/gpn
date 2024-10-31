@@ -3,6 +3,7 @@ from .GCN import GCNNet
 from .GAT import GATNet
 from .Edge import EdgeNet
 from .MR import MRNet
+from .GIN0 import GIN0Net
 
 model_mapping = {
     'GINNet': GINNet,

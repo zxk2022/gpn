@@ -30,7 +30,7 @@ class ShapeNetSkelDataset(InMemoryDataset):
     @property
     def raw_file_names(self) -> List[str]:
         # 返回所有类别的名称列表
-        return [folder for folder in os.listdir(self.raw_dir) if osp.isdir(osp.join(self.raw_dir, folder))]
+        return [osp.join(self.raw_dir, folder) for folder in os.listdir(self.raw_dir) if os.path.isdir(osp.join(self.raw_dir, folder))]
 
     @property
     def processed_file_names(self) -> str:
