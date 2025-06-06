@@ -236,36 +236,6 @@ gpn/
 └── README.md                   # This file
 ```
 
-## 📖 Citation
-
-If you use this code in your research, please cite:
-
-```bibtex
-@misc{gpn2024,
-  title={Graph-based Point Cloud Networks: A Comprehensive Study of Graph Construction Methods and Neural Architectures},
-  author={Your Name},
-  year={2024},
-  howpublished={\url{https://github.com/zxk2022/gpn}}
-}
-```
-
-## 🤝 Contributing
-
-We welcome contributions! Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-### Development Guidelines
-
-- Follow PEP 8 style guidelines
-- Add comprehensive docstrings
-- Include unit tests for new features
-- Update documentation as needed
-
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
