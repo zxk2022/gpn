@@ -4,17 +4,28 @@ A comprehensive framework for 3D point cloud classification using graph neural n
 
 ## 📋 Table of Contents
 
-- [Overview](#overview)
-- [Features](#features)
-- [Supported Models](#supported-models)
-- [Datasets](#datasets)
-- [Installation](#installation)
-- [Quick Start](#quick-start)
-- [Experimental Results](#experimental-results)
-- [Configuration](#configuration)
-- [Project Structure](#project-structure)
-- [Citation](#citation)
-- [Contributing](#contributing)
+- [Graph-based Point Cloud Networks (GPN)](#graph-based-point-cloud-networks-gpn)
+  - [📋 Table of Contents](#-table-of-contents)
+  - [🔍 Overview](#-overview)
+  - [✨ Features](#-features)
+  - [🤖 Supported Models](#-supported-models)
+  - [📊 Datasets](#-datasets)
+  - [🛠 Installation](#-installation)
+    - [Prerequisites](#prerequisites)
+    - [Environment Setup](#environment-setup)
+  - [🚀 Quick Start](#-quick-start)
+    - [Basic Training](#basic-training)
+    - [Model Performance Evaluation](#model-performance-evaluation)
+    - [Batch Experiments](#batch-experiments)
+  - [📈 Experimental Results](#-experimental-results)
+    - [Visual Results](#visual-results)
+    - [Key Findings](#key-findings)
+  - [⚙️ Configuration](#️-configuration)
+    - [YAML Configuration Format](#yaml-configuration-format)
+    - [Graph Construction Methods](#graph-construction-methods)
+  - [📁 Project Structure](#-project-structure)
+  - [📄 License](#-license)
+  - [🙏 Acknowledgments](#-acknowledgments)
 
 ## 🔍 Overview
 
@@ -107,48 +118,6 @@ done
 ```
 
 ## 📈 Experimental Results
-
-### Performance Comparison on Different Datasets
-
-#### ModelNet40 Classification Results
-
-| Method | Graph Type | Overall Accuracy (%) | Mean Accuracy (%) | Parameters | FLOPs |
-|--------|------------|---------------------|-------------------|------------|-------|
-| GCN | Gabriel | 92.5 ± 0.3 | 89.7 ± 0.5 | 1.2M | 2.1G |
-| GAT | Gabriel | 93.1 ± 0.4 | 90.3 ± 0.6 | 1.8M | 3.2G |
-| GIN | Gabriel | 93.8 ± 0.2 | 91.1 ± 0.4 | 1.5M | 2.8G |
-| EdgeConv | Gabriel | 94.2 ± 0.3 | 91.8 ± 0.5 | 1.9M | 3.5G |
-| MRNet | Gabriel | 93.6 ± 0.4 | 90.9 ± 0.6 | 1.4M | 2.6G |
-| GCN | k-NN | 91.8 ± 0.5 | 88.9 ± 0.7 | 1.2M | 2.1G |
-| GAT | k-NN | 92.4 ± 0.6 | 89.6 ± 0.8 | 1.8M | 3.2G |
-| GIN | k-NN | 93.2 ± 0.4 | 90.5 ± 0.6 | 1.5M | 2.8G |
-| EdgeConv | k-NN | 93.9 ± 0.3 | 91.2 ± 0.5 | 1.9M | 3.5G |
-| MRNet | k-NN | 93.1 ± 0.5 | 90.3 ± 0.7 | 1.4M | 2.6G |
-
-#### ModelNet10 Classification Results
-
-| Method | Graph Type | Overall Accuracy (%) | Mean Accuracy (%) |
-|--------|------------|---------------------|-------------------|
-| GCN | Gabriel | 95.2 ± 0.4 | 94.1 ± 0.6 |
-| GAT | Gabriel | 95.8 ± 0.3 | 94.9 ± 0.5 |
-| GIN | Gabriel | 96.1 ± 0.2 | 95.3 ± 0.4 |
-| EdgeConv | Gabriel | 96.5 ± 0.3 | 95.8 ± 0.5 |
-| MRNet | Gabriel | 95.9 ± 0.4 | 95.1 ± 0.6 |
-
-#### ScanObjectNN Classification Results
-
-| Method | Graph Type | Background | Overall Accuracy (%) | Mean Accuracy (%) |
-|--------|------------|------------|---------------------|-------------------|
-| GCN | Gabriel | Yes | 78.3 ± 0.8 | 75.2 ± 1.1 |
-| GAT | Gabriel | Yes | 79.1 ± 0.7 | 76.4 ± 1.0 |
-| GIN | Gabriel | Yes | 80.2 ± 0.6 | 77.8 ± 0.9 |
-| EdgeConv | Gabriel | Yes | 81.5 ± 0.5 | 79.1 ± 0.8 |
-| MRNet | Gabriel | Yes | 80.8 ± 0.7 | 78.5 ± 1.0 |
-| GCN | Gabriel | No | 82.1 ± 0.6 | 79.3 ± 0.9 |
-| GAT | Gabriel | No | 83.2 ± 0.5 | 80.8 ± 0.8 |
-| GIN | Gabriel | No | 84.3 ± 0.4 | 82.1 ± 0.7 |
-| EdgeConv | Gabriel | No | 85.7 ± 0.3 | 83.9 ± 0.6 |
-| MRNet | Gabriel | No | 84.9 ± 0.5 | 82.7 ± 0.8 |
 
 ### Visual Results
 
